@@ -10,10 +10,15 @@ import Foundation
 import SpriteKit
 
 class GameOverScene: SKScene {
+    let defaults:UserDefaults = UserDefaults.standard
     
-    init(size: CGSize, won:Bool) {
+    init(size: CGSize, won:Bool, score: Int) {
         
         super.init(size: size)
+        
+        if (score > defaults.integer(forKey: "HighScore")) {
+            defaults.set(score, forKey: "HighScore")
+        }
         
         // 1
         backgroundColor = SKColor.white

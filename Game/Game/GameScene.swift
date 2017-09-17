@@ -54,6 +54,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let player = SKSpriteNode(imageNamed: "player")
     var monstersDestroyed = 0
     let scoreLabel = SKLabelNode(fontNamed: "Chalkduster")
+    let highScoreLabel = SKLabelNode(fontNamed: "Chalkduster")
+    let defaults:UserDefaults = UserDefaults.standard
     
     
     override func didMove(to view: SKView) {
@@ -71,6 +73,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // 4
         addChild(player)
         addScore()
+        addHighScore()
         
         physicsWorld.gravity = CGVector.zero
         physicsWorld.contactDelegate = self
@@ -102,6 +105,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         scoreLabel.position = CGPoint(x: scoreLabel.frame.size.width/2, y: self.frame.size.height-scoreLabel.frame.size.height)
         scoreLabel.zPosition = 1
         addChild(scoreLabel)
+    }
+    
+    func addHighScore() {
+        let highScore = defaults.integer(forKey: "HighScore")
+        highScoreLabel.text = NSLocalizedString("High Score: \(highScore)", comment: "")
+        highScoreLabel.fontSize = 40
+        highScoreLabel.fontColor = SKColor.black
+        highScoreLabel.position = CGPoint(x: self.frame.size.width-(highScoreLabel.frame.size.width/2), y: self.frame.size.height-40)
+        highScoreLabel.zPosition = 1
+        addChild(highScoreLabel)
     }
     
     func createMonster2() -> SKSpriteNode {
@@ -140,7 +153,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         if let monster = monster {
             // Determine where to spawn the monster along the Y axis
-            let actualY = random(min: monster.size.height/2, max: size.height - monster.size.height/2)
+            let actualY = random(min: monster.size.height/2, max: size.height - monster.size.height/2-scoreLabel.fontSize)
             
             // Position the monster slightly off-screen along the right edge,
             // and along a random position along the Y axis as calculated above
@@ -154,7 +167,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             let loseAction = SKAction.run() {
                 let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
-                let gameOverScene = GameOverScene(size: self.size, won: false)
+                let gameOverScene = GameOverScene(size: self.size, won: false, score: self.monstersDestroyed)
                 self.view?.presentScene(gameOverScene, transition: reveal)
             }
             
@@ -223,9 +236,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             monstersDestroyed += 1
             scoreLabel.text = NSLocalizedString("Score: \(monstersDestroyed)", comment: "")
-            if (monstersDestroyed > 30) {
+            if (monstersDestroyed > 100) {
                 let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
-                let gameOverScene = GameOverScene(size: self.size, won: true)
+                let gameOverScene = GameOverScene(size: self.size, won: true, score: monstersDestroyed)
                 self.view?.presentScene(gameOverScene, transition: reveal)
             }
         }
